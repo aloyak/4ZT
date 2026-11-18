@@ -1,0 +1,8 @@
+build/
+profiling/
+
+*.ppm
+PLAN.md
+
+build-debug/
+build-release/
