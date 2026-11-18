@@ -2,6 +2,8 @@
 #include "4ZT/render/cpu-mt/cpu_intersect.h"
 #include "4ZT/render/cpu-mt/cpu_scatter.h"
 
+#include <iomanip>
+
 FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
                                          const Camera& camera,
                                          const World& world) {
@@ -35,8 +37,10 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     auto viewport_upper_left = camera.position - (camera.focalLength * w) - viewport_u/2 - viewport_v/2;
     auto pixelat00 = viewport_upper_left + (delta_u + delta_v) * 0.5;
 
-    /// TODO: multithreading!!
     for (int y = 0; y < img.height(); ++y) {
+        if (y % 10 == 0)
+            std::cerr << "\rRendering: " << std::fixed << std::setprecision(1) << (100.0 * y / img.height()) << "% " << std::flush;
+        
         for (int x = 0; x < img.width(); ++x) {
             Color pixelColor = Color(0, 0, 0);
             /// random sampling TODO: implement different sampling strategies (jittered)
@@ -53,6 +57,8 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
             img.at(x, y) = pixelColor;
         }
     }
+
+    std::cerr << "\rComplete.               " << std::endl;
 
     return img;
 }
@@ -71,7 +77,6 @@ Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, int dept
             }
             
             return Color(0.0, 0.0, 0.0);
-            // Recursively trace ray with new depth = depth - 1
         }
     }    
 
