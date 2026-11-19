@@ -1,8 +1,15 @@
+.vscode/
+
 build/
 profiling/
 
 *.ppm
+*.png
+*.jpg
+*.data
+
 PLAN.md
+TODO.md
 
 build-debug/
 build-release/
