@@ -4,18 +4,20 @@ int main() {
 
     FourZT::Settings settings;
     settings.backend = FourZT::Backend::CPU;
-    settings.outputHeight = 400;
+    settings.outputHeight = 500;
     settings.aspectRatio = 1.5;
 
-    settings.samplesPerPixel = 10;
+    settings.samplesPerPixel = 100;
     settings.maxDepth = 50;
+
+    settings.targetThreads = 24;
 
     FourZT::Engine engine(settings);
 
     FourZT::Camera camera(
         Point3(-2, 2, 1),
         Point3(0, 0, -1),
-        90.0
+        30.0
     );
 
     FourZT::World world;

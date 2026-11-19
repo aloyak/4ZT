@@ -3,12 +3,14 @@
 #include "4ZT/render/cpu-mt/cpu_scatter.h"
 
 #include <iomanip>
+#include <atomic>
+#include <vector>
 
 FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
                                          const Camera& camera,
                                          const World& world) {
     // Determine the number of threads to use
-    m_allowedThreads = std::min(m_maxAvailiableThreads, settings.targetThreads);
+    m_allowedThreads = std::max(1, std::min(m_maxAvailiableThreads, settings.targetThreads));
 
     int imgHeight = settings.outputHeight;
     int imgWidth = settings.outputHeight * settings.aspectRatio;
@@ -37,39 +39,61 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     auto viewport_upper_left = camera.position - (camera.focalLength * w) - viewport_u/2 - viewport_v/2;
     auto pixelat00 = viewport_upper_left + (delta_u + delta_v) * 0.5;
 
-    for (int y = 0; y < img.height(); ++y) {
-        if (y % 10 == 0)
-            std::cerr << "\rRendering: " << std::fixed << std::setprecision(1) << (100.0 * y / img.height()) << "% " << std::flush;
-        
-        for (int x = 0; x < img.width(); ++x) {
-            Color pixelColor = Color(0, 0, 0);
-            /// random sampling TODO: implement different sampling strategies (jittered)
-            for (int s = 0; s < settings.samplesPerPixel; ++s) {
-                double offset_x = randomDouble() - 0.5;   // [-0.5, 0.5)
-                double offset_y = randomDouble() - 0.5;
+    std::atomic<int> nextRow(0);
+    std::atomic<int> rowsDone(0);
 
-                auto pixel_sample = pixelat00 + delta_u * (x + offset_x) + delta_v * (y + offset_y);
-                auto dir = (pixel_sample - camera.position).normalize();
-                Ray ray(camera.position, dir);
+    auto worker = [&](int threadId) {
+        while (true) {
+            int y = nextRow.fetch_add(1);
+            if (y >= imgHeight) break;
 
-                pixelColor += TraceRay(ray, world, settings.maxDepth) * (1.0 / settings.samplesPerPixel);
+            for (int x = 0; x < imgWidth; ++x) {
+                Color pixelColor(0, 0, 0);
+                /// random sampling TODO: implement different sampling strategies (jittered)
+                for (int s = 0; s < settings.samplesPerPixel; ++s) {
+                    double offset_x = randomDouble() - 0.5;   // [-0.5, 0.5)
+                    double offset_y = randomDouble() - 0.5;
+
+                    auto pixel_sample = pixelat00 + delta_u * (x + offset_x) + delta_v * (y + offset_y);
+                    auto dir = (pixel_sample - camera.position).normalize();
+                    Ray ray(camera.position, dir);
+
+                    pixelColor += TraceRay(ray, world, settings.maxDepth) * (1.0/settings.samplesPerPixel);
+                }
+                img.at(x, y) = pixelColor;
             }
-            img.at(x, y) = pixelColor;
+
+            int done = rowsDone.fetch_add(1) + 1;
+            if (threadId == 0)
+                std::cerr << "\rRendering: " << std::fixed << std::setprecision(1)
+                        << (100.0 * done / imgHeight) << "% " << std::flush;
         }
-    }
+    };
+
+    // Spawn N-1 helpers (none if N == 1), then the calling thread works too
+    std::vector<std::thread> m_threads;
+    m_threads.reserve(m_allowedThreads - 1);
+    for (int t = 1; t < m_allowedThreads; ++t)
+    m_threads.emplace_back(worker, t);
+
+    // Make sure the current thread also does some work!
+    worker(0);
+
+    for (auto& thread : m_threads)
+        thread.join(); // Wait for all threads to finish
 
     std::cerr << "\rComplete.               " << std::endl;
 
     return img;
 }
 
-Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, int depth) {
+Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, int depth) const {
     if (depth <= 0) 
         return Color(0, 0, 0);
     
     for (const auto& object : world.Get()) {
         HitRecord record;
-        if (Intersector::Hit(*object, ray, Interval(0, infinity), record)) { 
+        if (Intersector::Hit(*object, ray, Interval(0.01, infinity), record)) { 
             Ray scattered;
             Color attenuation;
             if (Scatterer::Scatter(*object->GetMaterial(), ray, record, attenuation, scattered)) {

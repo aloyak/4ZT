@@ -1,7 +1,6 @@
 #pragma once
 
 #include <thread>
-#include <algorithm>
 
 #include "4ZT/render/render.h"
 #include "4ZT/render/cpu-mt/ray.h"
@@ -19,15 +18,15 @@ public:
                  const Camera& camera,
                  const World& world) override;
 
-    Color TraceRay(const Ray& ray, const World& world, int depth = 0);
+    Color TraceRay(const Ray& ray, const World& world, int depth = 0) const;
 private:
     int m_maxAvailiableThreads = std::thread::hardware_concurrency();
     int m_allowedThreads;
 
     /// TODO: check if it'd be better to move this to the abstract render class
     // only if the gpu renderer uses it too 
-    int m_viewportWidth;
-    int m_viewportHeight;
+    double m_viewportWidth;
+    double m_viewportHeight;
 };
 
 }
