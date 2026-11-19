@@ -1,5 +1,6 @@
 #pragma once
 
+#include "4ZT/world.h"
 #include "4ZT/object.h"
 #include "4ZT/render/cpu-mt/ray.h"
 
@@ -13,6 +14,8 @@ struct HitRecord {
     Vec3 normal;
     Color color;
 
+    const Material* material;
+
     bool frontFace;
 
     // Makes the normal always point against the incoming ray
@@ -24,9 +27,13 @@ struct HitRecord {
 
 class Intersector {
 public:
-    static bool Hit(const Object& object, const Ray& ray, Interval range, HitRecord& record);
+    // Returns the closest possible intersection, of the ray, not the first
+    static bool WorldHit(const World& world, const Ray& ray, Interval range, HitRecord& record);
 
-    // sphere intersection
+private:
+    static bool ObjectHit(const Object& object, const Ray& ray, Interval range, HitRecord& record);
+
+    // Dispatched from ObjectHit
     static bool SphereHit(const Sphere& sphere, const Ray& ray, Interval range, HitRecord& record);
 
     /// TODO: triangle, mesh...

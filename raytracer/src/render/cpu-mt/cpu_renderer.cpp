@@ -91,17 +91,15 @@ Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, int dept
     if (depth <= 0) 
         return Color(0, 0, 0);
     
-    for (const auto& object : world.Get()) {
-        HitRecord record;
-        if (Intersector::Hit(*object, ray, Interval(0.01, infinity), record)) { 
-            Ray scattered;
-            Color attenuation;
-            if (Scatterer::Scatter(*object->GetMaterial(), ray, record, attenuation, scattered)) {
-                return hadamard(attenuation, TraceRay(scattered, world, depth - 1));
-            }
-            
-            return Color(0.0, 0.0, 0.0);
+    HitRecord record;
+    if (Intersector::WorldHit(world, ray, Interval(0.01, infinity), record)) { 
+        Ray scattered;
+        Color attenuation;
+        if (Scatterer::Scatter(*record.material, ray, record, attenuation, scattered)) {
+            return hadamard(attenuation, TraceRay(scattered, world, depth - 1));
         }
+        
+        return Color(0.0, 0.0, 0.0);
     }    
 
     // Skies, just for testing

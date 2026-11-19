@@ -1,5 +1,8 @@
 #pragma once
 
+// Abstract material class, they only hold the properties and data
+// Scatter is done by the different renderer types, each having its own implementation
+
 #include "4ZT/math/math.h"
 
 namespace FourZT {
