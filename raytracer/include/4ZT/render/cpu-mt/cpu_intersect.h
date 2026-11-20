@@ -37,6 +37,7 @@ private:
 
     // Dispatched from ObjectHit
     static bool SphereHit(const Sphere& sphere, const Ray& ray, Interval range, HitRecord& record);
+    static bool QuadHit(const Quad& quad, const Ray& ray, Interval range, HitRecord& record);
 
     /// TODO: triangle, mesh...
 };

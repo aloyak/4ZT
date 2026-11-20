@@ -12,7 +12,8 @@ namespace FourZT {
 
 enum class ObjectKind {
     Sphere,
-    Triangle,
+    Quad,
+    //Triangle,
 };
 
 class Object {
@@ -44,6 +45,26 @@ public:
 private:
     Point3 m_center{};
     double m_radius = 0.0;
+};
+
+class Quad : public Object {
+public:
+    Quad(const Point3& Q, const Vec3& u, const Vec3& v, std::shared_ptr<Material> material)
+        : Object(ObjectKind::Quad, std::move(material)), m_Q(Q), m_u(u), m_v(v)
+    {}
+
+    const Point3& Q() const { return m_Q; }
+    const Vec3& U() const { return m_u; }
+    const Vec3& V() const { return m_v; }
+
+    Point3 P0() const { return m_Q; }
+    Point3 P1() const { return m_Q + m_u; }
+    Point3 P2() const { return m_Q + m_u + m_v; }
+    Point3 P3() const { return m_Q + m_v; }
+
+private:
+    Point3 m_Q;
+    Vec3 m_u, m_v;
 };
 
 /// TODO: plane, triangle, mesh...

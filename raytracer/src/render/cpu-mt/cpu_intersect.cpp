@@ -66,6 +66,8 @@ bool FourZT::Intersector::ObjectHit(const Object& object, const Ray& ray, Interv
     switch (object.Kind()) {
         case ObjectKind::Sphere:
             return SphereHit(static_cast<const Sphere&>(object), ray, range, record);
+        case ObjectKind::Quad:
+            return QuadHit(static_cast<const Quad&>(object), ray, range, record);
         //case ObjectKind::Triangle:
         //case ObjectKind::Mesh:
         default:
@@ -98,5 +100,34 @@ bool FourZT::Intersector::SphereHit(const Sphere& sphere, const Ray& ray, Interv
     Vec3 outwardNormal = (record.point - sphere.Center()) / sphere.Radius();
     record.SetFaceNormal(ray, outwardNormal);
     record.material = sphere.GetMaterial();
+    return true;
+}
+
+bool FourZT::Intersector::QuadHit(const Quad& quad, const Ray& ray, Interval range, HitRecord& record) {
+    const Vec3& u = quad.U();
+    const Vec3& v = quad.V();
+
+    Vec3 n = cross(u, v);
+    Vec3 normal = n.normalize();
+    Vec3 w = n / dot(n, n);              // precomputable per quad
+
+    double denom = dot(normal, ray.Direction());
+    if (std::abs(denom) < 1e-8) return false;
+
+    double D = dot(normal, quad.Q());
+    double t = (D - dot(normal, ray.Origin())) / denom;
+    if (!range.Surrounds(t)) return false;
+
+    Point3 p = ray.At(t);
+    Vec3 planar = p - quad.Q();
+    double alpha = dot(w, cross(planar, v));
+    double beta  = dot(w, cross(u, planar));
+
+    if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0) return false;
+
+    record.t = t;
+    record.point = p;
+    record.SetFaceNormal(ray, normal);
+    record.material = quad.GetMaterial();
     return true;
 }
