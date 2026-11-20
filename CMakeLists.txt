@@ -9,4 +9,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(raytracer)
 add_subdirectory(client)
-# add_subdirectory(previewer)
+add_subdirectory(scout)
