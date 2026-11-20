@@ -4,7 +4,10 @@
 #include <vector>
 
 #include "4ZT/object.h"
+#include "4ZT/composite.h"
 #include "4ZT/material.h"
+
+#include "4ZT/math/math.h"
 
 namespace FourZT {
     
@@ -17,9 +20,25 @@ public:
         m_objects.push_back(std::move(obj));
     }
 
+    void Add(std::unique_ptr<Composite> composite) {
+        auto primitives = composite->GetPrimitives();
+        for (auto& obj : primitives) {
+            m_objects.push_back(std::move(obj));
+        }
+    }
+
+    // Allows both default objects or composites
     template <class T, class... Args>
     void Add(Args&&... args) {
-        m_objects.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        if constexpr (std::is_base_of_v<Composite, T>) {
+            T composite(std::forward<Args>(args)...);
+            auto primitives = composite.GetPrimitives();
+            for (auto& obj : primitives) {
+                m_objects.push_back(std::move(obj));
+            }
+        } else {
+            m_objects.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        }
     }
 
     const std::vector<std::unique_ptr<Object>>& Get() const {
