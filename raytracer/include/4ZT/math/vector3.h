@@ -20,6 +20,15 @@ public:
     Vec3 operator*=(double s) { x *= s; y *= s; z *= s; return *this; }
     Vec3 operator/=(double s) { x /= s; y /= s; z /= s; return *this; }
 
+    double operator[](int i) const {
+        switch (i) {
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            default: throw std::out_of_range("Vec3 index out of range");
+           }
+    }
+
     double dot(const Vec3& o) const { return x * o.x + y * o.y + z * o.z; }
 
     Vec3 cross(const Vec3& o) const {

@@ -1,5 +1,8 @@
 #pragma once
 
+// Abstract object class, they only hold the properties and data
+// Intersection is done by the different renderer types, each having its own implementation
+
 #include <memory>
 
 #include "4ZT/math/math.h"
@@ -18,7 +21,7 @@ public:
 
     ObjectKind Kind() const { return m_kind; }
 
-    std::shared_ptr<Material> GetMaterial() const { return m_material; }
+    inline const Material* GetMaterial() const { return m_material.get(); }
         
 protected:
     explicit Object(ObjectKind kind, std::shared_ptr<Material> material) 
@@ -32,8 +35,8 @@ private:
 class Sphere : public Object {
 public:
     Sphere(const Point3& center, double radius, std::shared_ptr<Material> material)
-        : Object(ObjectKind::Sphere, std::move(material)),
-          m_center(center), m_radius(radius) {}
+        : Object(ObjectKind::Sphere, std::move(material)), m_center(center), m_radius(radius) 
+    {}
 
     const Point3& Center() const { return m_center; }
     double Radius() const { return m_radius; }
