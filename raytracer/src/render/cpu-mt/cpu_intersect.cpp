@@ -1,19 +1,66 @@
 #include "4ZT/render/cpu-mt/cpu_intersect.h"
 
-bool FourZT::Intersector::WorldHit(const World& world, const Ray& ray, Interval range, HitRecord& record) {
+// stack is used to keep track of the nodes we intersected with and need to visit later
+// size is the stack pointer, which points to the next free slot in the stack
+struct NodeStack {
+    int data[64]; // 64 is generous, enough for a BVH with 2^64 nodes (would require 2^64 objects to overflow, theoretically)
+    int size = 0;
+
+    // [i++] is different to [++i], one increments the pointer after the assignment, the other increments before the assignment
+    // equivalent to stack[i] = 0; i++; but more efficient
+    void push(int v) { data[size++] = v; }
+    int  pop()       { return data[--size]; }
+    bool empty() const { return size == 0; }
+};
+
+bool FourZT::Intersector::Hit(const World& world, const BVH& bvh, const Ray& ray, Interval range, HitRecord& record) {
+    if (bvh.nodes.empty()) return false;
+
+    const auto& objects = world.Get();
     bool hitAny = false;
     double closest = range.max;
     HitRecord temp;
 
-    for (const auto& object : world.Get()) {
-        if (ObjectHit(*object, ray, Interval(range.min, closest), temp)) {
-            hitAny = true;
-            closest = temp.t;
-            record = temp;
+    NodeStack stack;
+    stack.push(0); // start at root
+
+    while (!stack.empty()) {
+        const BVHNode& node = bvh.nodes[stack.pop()];
+        if (!AABBHit(node.bounds, ray, Interval(range.min, closest)))
+            continue;   // skips this node and its whole subtree cuz theres no intersection
+
+        if (node.objectCount > 0) {   // leaf, real intersection!
+            for (int i = 0; i < node.objectCount; i++) {
+                const Object& obj = *objects[bvh.objectIndices[node.leftOrFirst + i]];
+                if (ObjectHit(obj, ray, Interval(range.min, closest), temp)) {
+                    hitAny = true;
+                    closest = temp.t;
+                    record = temp;
+                }
+            }
+        } else { // interior
+            stack.push(node.leftOrFirst); // left child
+            stack.push(node.leftOrFirst + 1); // right
         }
     }
+    
     return hitAny;
 }
+
+bool FourZT::Intersector::AABBHit(const AABB& box, const Ray& ray, Interval range) {
+    for (int i = 0; i < 3; ++i) {
+        double invDir = 1.0 / ray.Direction()[i];
+        double t0 = (box[i].min - ray.Origin()[i]) * invDir;
+        double t1 = (box[i].max - ray.Origin()[i]) * invDir;
+        if (invDir < 0.0) std::swap(t0, t1);
+        range.min = std::max(t0, range.min);
+        range.max = std::min(t1, range.max);
+        if (range.max <= range.min)
+            return false;
+    }
+    return true;
+}
+
 
 bool FourZT::Intersector::ObjectHit(const Object& object, const Ray& ray, Interval range, HitRecord& record) {
     switch (object.Kind()) {

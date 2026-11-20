@@ -4,6 +4,8 @@
 #include "4ZT/object.h"
 #include "4ZT/render/cpu-mt/ray.h"
 
+#include "4ZT/bvh/bvh.h"
+
 namespace FourZT {
     
 #include "4ZT/math/math.h"
@@ -27,10 +29,10 @@ struct HitRecord {
 
 class Intersector {
 public:
-    // Returns the closest possible intersection, of the ray, not the first
-    static bool WorldHit(const World& world, const Ray& ray, Interval range, HitRecord& record);
-
+    static bool Hit(const World& world, const BVH& bvh, const Ray& ray, Interval range, HitRecord& record);
+    
 private:
+    static bool AABBHit(const AABB& box, const Ray& ray, Interval range);
     static bool ObjectHit(const Object& object, const Ray& ray, Interval range, HitRecord& record);
 
     // Dispatched from ObjectHit

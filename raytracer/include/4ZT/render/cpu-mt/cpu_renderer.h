@@ -10,6 +10,8 @@
 #include "4ZT/world.h"
 #include "4ZT/image.h"
 
+#include "4ZT/bvh/bvh.h"
+
 namespace FourZT {
 
 class CPURenderer : public Renderer {
@@ -18,7 +20,7 @@ public:
                  const Camera& camera,
                  const World& world) override;
 
-    Color TraceRay(const Ray& ray, const World& world, int depth = 0) const;
+    Color TraceRay(const Ray& ray, const World& world, const BVH& bvh, int depth = 0) const;
 private:
     int m_maxAvailiableThreads = std::thread::hardware_concurrency();
     int m_allowedThreads;

@@ -39,6 +39,9 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     auto viewport_upper_left = camera.position - (camera.focalLength * w) - viewport_u/2 - viewport_v/2;
     auto pixelat00 = viewport_upper_left + (delta_u + delta_v) * 0.5;
 
+
+    BVH bvh = BVH::Build(world);
+    
     std::atomic<int> nextRow(0);
     std::atomic<int> rowsDone(0);
 
@@ -58,7 +61,7 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
                     auto dir = (pixel_sample - camera.position).normalize();
                     Ray ray(camera.position, dir);
 
-                    pixelColor += TraceRay(ray, world, settings.maxDepth) * (1.0/settings.samplesPerPixel);
+                    pixelColor += TraceRay(ray, world, bvh, settings.maxDepth) * (1.0/settings.samplesPerPixel);
                 }
                 img.at(x, y) = pixelColor;
             }
@@ -87,16 +90,16 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     return img;
 }
 
-Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, int depth) const {
+Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const BVH& bvh, int depth) const {
     if (depth <= 0) 
         return Color(0, 0, 0);
     
     HitRecord record;
-    if (Intersector::WorldHit(world, ray, Interval(0.01, infinity), record)) { 
+    if (Intersector::Hit(world, bvh, ray, Interval(0.001, infinity), record)) { 
         Ray scattered;
         Color attenuation;
         if (Scatterer::Scatter(*record.material, ray, record, attenuation, scattered)) {
-            return hadamard(attenuation, TraceRay(scattered, world, depth - 1));
+            return hadamard(attenuation, TraceRay(scattered, world, bvh, depth - 1));
         }
         
         return Color(0.0, 0.0, 0.0);
