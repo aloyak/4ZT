@@ -107,27 +107,23 @@ bool FourZT::Intersector::QuadHit(const Quad& quad, const Ray& ray, Interval ran
     const Vec3& u = quad.U();
     const Vec3& v = quad.V();
 
-    Vec3 n = cross(u, v);
-    Vec3 normal = n.normalize();
-    Vec3 w = n / dot(n, n);              // precomputable per quad
-
-    double denom = dot(normal, ray.Direction());
+    double denom = dot(quad.Normal(), ray.Direction());
     if (std::abs(denom) < 1e-8) return false;
 
-    double D = dot(normal, quad.Q());
-    double t = (D - dot(normal, ray.Origin())) / denom;
+    double D = dot(quad.Normal(), quad.Q());
+    double t = (D - dot(quad.Normal(), ray.Origin())) / denom;
     if (!range.Surrounds(t)) return false;
 
     Point3 p = ray.At(t);
     Vec3 planar = p - quad.Q();
-    double alpha = dot(w, cross(planar, v));
-    double beta  = dot(w, cross(u, planar));
+    double alpha = dot(quad.W(), cross(planar, v));
+    double beta  = dot(quad.W(), cross(u, planar));
 
     if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0) return false;
 
     record.t = t;
     record.point = p;
-    record.SetFaceNormal(ray, normal);
+    record.SetFaceNormal(ray, quad.Normal());
     record.material = quad.GetMaterial();
     return true;
 }

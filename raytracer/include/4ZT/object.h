@@ -51,7 +51,11 @@ class Quad : public Object {
 public:
     Quad(const Point3& Q, const Vec3& u, const Vec3& v, std::shared_ptr<Material> material)
         : Object(ObjectKind::Quad, std::move(material)), m_Q(Q), m_u(u), m_v(v)
-    {}
+    {
+        Vec3 n = cross(u, v);
+        m_normal = n.normalize();
+        m_w = n / dot(n, n);
+    }
 
     const Point3& Q() const { return m_Q; }
     const Vec3& U() const { return m_u; }
@@ -62,9 +66,16 @@ public:
     Point3 P2() const { return m_Q + m_u + m_v; }
     Point3 P3() const { return m_Q + m_v; }
 
+    const Vec3& Normal() const { return m_normal; }
+    const Vec3& W() const { return m_w; }
+
 private:
     Point3 m_Q;
     Vec3 m_u, m_v;
+
+    // precomputed for efficency, once per quad instead of per ray
+    Vec3 m_normal;
+    Vec3 m_w;
 };
 
 /// TODO: plane, triangle, mesh...
