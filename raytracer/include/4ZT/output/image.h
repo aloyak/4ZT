@@ -42,15 +42,16 @@ public:
     int width()  const { return m_buffer.width(); }
     int height() const { return m_buffer.height(); }
 
-    // Assumes the file type from the extension, defaults to ppm because its easy
-    /// TODO: jpg, png and bmp
-    void Save(const std::string& filename) const;
+    // Assumes the file type from the extension
+    bool Save(const std::string& filename) const;
 
     // Prints out the image in PPM format to stdout, easy to redirect to a file, used for testing
     void PrintOut() const;
 
 private:
     Buffer<Color> m_buffer;
+
+    void WritePPM(std::ostream& out) const;
 };
 
 } // 4zt
