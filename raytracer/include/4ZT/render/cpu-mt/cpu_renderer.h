@@ -20,7 +20,7 @@ public:
                  const Camera& camera,
                  const World& world) override;
 
-    Color TraceRay(const Ray& ray, const World& world, const BVH& bvh, int depth = 0) const;
+    Color TraceRay(const Ray& ray, const World& world, const Camera& cam, const BVH& bvh, int depth = 0) const;
 private:
     int m_maxAvailiableThreads = std::thread::hardware_concurrency();
     int m_allowedThreads;

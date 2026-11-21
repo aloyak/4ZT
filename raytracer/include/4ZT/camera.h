@@ -21,6 +21,9 @@ public:
     
     double fov;
     double focalLength = 1.0; // distance from the camera to the image plane
+
+    Color background = Color(0,0,0);
+    bool useSkybox = true;
 };
 
 } // 4zt
