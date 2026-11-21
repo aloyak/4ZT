@@ -4,8 +4,6 @@ build/
 profiling/
 
 *.ppm
-*.png
-*.jpg
 *.data
 
 PLAN.md
