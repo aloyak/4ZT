@@ -48,9 +48,9 @@ private:
     double m_fuzz;
 };
 
-class Dialectric : public Material {
+class Dielectric : public Material {
 public:
-    Dialectric(double refractionIndex) : m_refractionIndex(refractionIndex), Material(MaterialKind::Dielectric) {}
+    Dielectric(double refractionIndex) : m_refractionIndex(refractionIndex), Material(MaterialKind::Dielectric) {}
 
     double RefractionIndex() const { return m_refractionIndex; }
 
