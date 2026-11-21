@@ -52,8 +52,6 @@ private:
     bool m_running = false;
 
     std::vector<std::unique_ptr<Layer>> m_layers;
-
-
     Context m_context;
 };
 

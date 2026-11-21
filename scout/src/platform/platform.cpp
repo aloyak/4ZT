@@ -56,14 +56,4 @@ void Scout::Platform::OnUpdate(float deltaTime, Context& context) {
 }
 
 void Scout::Platform::OnRender(Context& context) {
-    (void)context;
-
-    SDL_Renderer* renderer = m_window.GetRenderer();
-    if (!renderer) {
-        return;
-    }
-
-    SDL_SetRenderDrawColor(renderer, 24, 28, 36, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
 }
