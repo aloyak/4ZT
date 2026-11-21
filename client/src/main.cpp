@@ -21,6 +21,7 @@ int main() {
         Point3(278, 278, 0),
         40.0
     );
+    camera.useSkybox = false;
 
     FourZT::World world;
 
@@ -45,6 +46,9 @@ int main() {
     world.Add<FourZT::Box>(Point3(347.5, 165, 377.5), Vec3(165, 330, 165), Vec3(0, torads(15), 0), white);
     world.Add<FourZT::Box>(Point3(212.5, 82.5, 147.5), Vec3(165, 165, 165), Vec3(0, torads(-18), 0), white);
     
+    auto light = std::make_shared<FourZT::Emissive>(Color(15, 15, 15));
+    world.Add<FourZT::Quad>(Point3(343, 554, 332), Vec3(-130, 0, 0), Vec3(0, 0, -105), light);
+    //world.Add<FourZT::Sphere>(Point3(343, 554, 332), 105, light);
     FourZT::Image image = engine.Render(camera, world);
     //image.Save("out.ppm");
     image.PrintOut();
