@@ -25,6 +25,10 @@ public:
         return value > min && value < max; 
     }
 
+    double Clamp(double value) const {
+        return std::clamp(value, min, max);
+    }
+
 private:
     static constexpr double infinity = std::numeric_limits<double>::infinity();
 };
