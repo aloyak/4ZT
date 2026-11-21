@@ -7,7 +7,10 @@
 #include <filesystem>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include <stb_image_write.h>
+
+#define TINYEXR_IMPLEMENTATION
+#include <tinyexr.h>
 
 static const Interval intensity(0.000, 0.999);
 
@@ -113,6 +116,19 @@ bool FourZT::Image::SaveHDR(const std::string& filename) const {
 }
 
 bool FourZT::Image::SaveEXR(const std::string& filename) const {
-    std::cerr << "Error: EXR saving not implemented yet!\n";
-    return false;
+    auto pixels = ToRGBFloat(); // interleaved, linear, top-down: exactly what EXR wants
+
+    const char* err = nullptr;
+    const int saveAsFp16 = 1; // 1 = half float, 0 = 32-bit float
+
+    // :: to call the global tinyexr::SaveEXR function, not this method!
+    int ret = ::SaveEXR(pixels.data(), width(), height(), 3,
+                        saveAsFp16, filename.c_str(), &err);
+
+    if (ret != TINYEXR_SUCCESS) {
+        std::cerr << "EXR write failed: " << (err ? err : "unknown error") << std::endl;
+        if (err) FreeEXRErrorMessage(err);
+        return false;
+    }
+    return true;
 }
