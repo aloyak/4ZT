@@ -1,6 +1,7 @@
 #include "4ZT/render/cpu-mt/cpu_renderer.h"
 #include "4ZT/render/cpu-mt/cpu_intersect.h"
 #include "4ZT/render/cpu-mt/cpu_scatter.h"
+#include "4ZT/render/cpu-mt/cpu_emitted.h"
 
 #include <iomanip>
 #include <atomic>
@@ -61,7 +62,7 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
                     auto dir = (pixel_sample - camera.position).normalize();
                     Ray ray(camera.position, dir);
 
-                    pixelColor += TraceRay(ray, world, bvh, settings.maxDepth) * (1.0/settings.samplesPerPixel);
+                    pixelColor += TraceRay(ray, world, camera, bvh, settings.maxDepth) * (1.0/settings.samplesPerPixel);
                 }
                 img.at(x, y) = pixelColor;
             }
@@ -90,7 +91,7 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     return img;
 }
 
-Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const BVH& bvh, int depth) const {
+Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const Camera& cam, const BVH& bvh, int depth) const {
     if (depth <= 0) 
         return Color(0, 0, 0);
     
@@ -98,14 +99,19 @@ Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const BV
     if (Intersector::Hit(world, bvh, ray, Interval(0.001, infinity), record)) { 
         Ray scattered;
         Color attenuation;
+
+        Color emitted = Emitter::Emitted(*record.material);
+
         if (Scatterer::Scatter(*record.material, ray, record, attenuation, scattered)) {
-            return hadamard(attenuation, TraceRay(scattered, world, bvh, depth - 1));
+            return emitted + hadamard(attenuation, TraceRay(scattered, world, cam, bvh, depth - 1));
         }
         
-        return Color(0.0, 0.0, 0.0);
+        return emitted; 
     }    
 
-    // Skies, just for testing
+    if (!cam.useSkybox) 
+        return cam.background;
+
     Vec3 unit_direction = ray.Direction().normalize();
     double t = 0.5 * (unit_direction.y + 1.0);
     return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);

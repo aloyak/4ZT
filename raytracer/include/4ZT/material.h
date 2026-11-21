@@ -10,7 +10,8 @@ namespace FourZT {
 enum class MaterialKind {
     Lambertian,
     Metal,
-    Dielectric
+    Dielectric,
+    Emissive,
 };
 
 class Material {
@@ -55,6 +56,17 @@ public:
 
 private:
     double m_refractionIndex;
+};
+
+class Emissive : public Material {
+public:
+    Emissive(const Color& color = Color(1, 1, 1)) : m_color(color), Material(MaterialKind::Emissive) {}
+
+    const Color& Emission() const { return m_color; }
+
+private:
+    Color m_color;
+
 };
 
 } // 4zt

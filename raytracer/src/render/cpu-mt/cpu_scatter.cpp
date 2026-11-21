@@ -15,6 +15,8 @@ bool FourZT::Scatterer::Scatter(
         case MaterialKind::Dielectric:
             return DialectricScatter(static_cast<const Dialectric&>(material),
                                      rayIn, record, attenuation, scattered);
+        case MaterialKind::Emissive:
+            return false; // Emissive materials do not scatter rays
         default:
             return false;
     }
