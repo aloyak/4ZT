@@ -43,7 +43,7 @@ public:
     int height() const { return m_buffer.height(); }
 
     // Assumes the file type from the extension
-    bool Save(const std::string& filename) const;
+    bool Save(const std::string& filename, int jpgQuality = 95) const;
 
     // Prints out the image in PPM format to stdout, easy to redirect to a file, used for testing
     void PrintOut() const;
@@ -52,6 +52,20 @@ private:
     Buffer<Color> m_buffer;
 
     void WritePPM(std::ostream& out) const;
+
+    // Top-down, sRGB-encoded 8-bit RGB (for PNG/JPG)
+    std::vector<unsigned char> ToRGB8() const;
+    // Top-down, linear float RGB (for HDR/EXR)
+    std::vector<float> ToRGBFloat() const;
+
+    // SDR
+    bool SavePPM(const std::string& filename) const;
+    bool SavePNG(const std::string& filename) const;
+    bool SaveJPG(const std::string& filename, int quality) const;
+    
+    // HDR
+    bool SaveHDR(const std::string& filename) const;
+    bool SaveEXR(const std::string& filename) const; // TODO
 };
 
 } // 4zt
