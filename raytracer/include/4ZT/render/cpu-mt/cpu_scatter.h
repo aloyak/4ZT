@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "4ZT/material.h"
+#include "4ZT/world/material.h"
 
 #include "4ZT/render/cpu-mt/cpu_intersect.h"
 #include "4ZT/render/cpu-mt/ray.h"

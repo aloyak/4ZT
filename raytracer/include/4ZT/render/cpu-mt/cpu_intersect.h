@@ -1,7 +1,7 @@
 #pragma once
 
-#include "4ZT/world.h"
-#include "4ZT/object.h"
+#include "4ZT/world/world.h"
+#include "4ZT/world/object.h"
 #include "4ZT/render/cpu-mt/ray.h"
 
 #include "4ZT/bvh/bvh.h"

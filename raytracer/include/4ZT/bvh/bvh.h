@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "4ZT/bvh/aabb.h"
-#include "4ZT/world.h"
+#include "4ZT/world/world.h"
 
 namespace FourZT {
 

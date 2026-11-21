@@ -1,4 +1,4 @@
-#include "4ZT/image.h"
+#include "4ZT/output/image.h"
 
 static const Interval intensity(0.000, 0.999);
 

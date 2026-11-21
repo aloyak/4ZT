@@ -7,8 +7,8 @@
 
 #include "4ZT/settings.h"
 #include "4ZT/camera.h"
-#include "4ZT/world.h"
-#include "4ZT/image.h"
+#include "4ZT/world/world.h"
+#include "4ZT/output/image.h"
 
 #include "4ZT/bvh/bvh.h"
 

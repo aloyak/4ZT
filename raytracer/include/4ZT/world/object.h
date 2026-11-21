@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "4ZT/math/math.h"
-#include "4ZT/material.h"
+#include "4ZT/world/material.h"
 
 namespace FourZT {
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "4ZT/math/math.h"
-#include "4ZT/object.h"
+#include "4ZT/world/object.h"
 
 namespace FourZT {
 

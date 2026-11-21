@@ -3,9 +3,9 @@
 #include <utility>
 #include <vector>
 
-#include "4ZT/object.h"
-#include "4ZT/composite.h"
-#include "4ZT/material.h"
+#include "4ZT/world/object.h"
+#include "4ZT/world/composite.h"
+#include "4ZT/world/material.h"
 
 #include "4ZT/math/math.h"
 

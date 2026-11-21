@@ -1,6 +1,6 @@
 #pragma once
 
-#include "4ZT/material.h"
+#include "4ZT/world/material.h"
 
 namespace FourZT {
 
