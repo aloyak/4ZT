@@ -15,7 +15,7 @@ public:
 
     static bool LambertianScatter(const Lambertian& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered);
     static bool MetalScatter(const Metal& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered);
-    static bool DialectricScatter(const Dialectric& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered);
+    static bool DielectricScatter(const Dielectric& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered);
 };
 
 } // 4zt

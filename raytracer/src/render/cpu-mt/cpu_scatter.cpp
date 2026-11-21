@@ -13,7 +13,7 @@ bool FourZT::Scatterer::Scatter(
             return MetalScatter(static_cast<const Metal&>(material),
                                 rayIn, record, attenuation, scattered);
         case MaterialKind::Dielectric:
-            return DialectricScatter(static_cast<const Dialectric&>(material),
+            return DielectricScatter(static_cast<const Dielectric&>(material),
                                      rayIn, record, attenuation, scattered);
         case MaterialKind::Emissive:
             return false; // Emissive materials do not scatter rays
@@ -41,8 +41,8 @@ bool FourZT::Scatterer::MetalScatter(
     return true;
 }
 
-bool FourZT::Scatterer::DialectricScatter(
-    const Dialectric& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered
+bool FourZT::Scatterer::DielectricScatter(
+    const Dielectric& material, const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scattered
 ) {
     attenuation = Color(1.0, 1.0, 1.0);
     double ri = record.frontFace ? (1.0/material.RefractionIndex()) : material.RefractionIndex();
