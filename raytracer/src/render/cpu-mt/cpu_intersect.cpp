@@ -48,17 +48,20 @@ bool FourZT::Intersector::Hit(const World& world, const BVH& bvh, const Ray& ray
 }
 
 bool FourZT::Intersector::AABBHit(const AABB& box, const Ray& ray, Interval range) {
+    const Point3& o   = ray.Origin();
+    const Vec3&   inv = ray.InvDirection();
+    double tmin = range.min;
+    double tmax = range.max;
+
     for (int i = 0; i < 3; ++i) {
-        double invDir = 1.0 / ray.Direction()[i];
-        double t0 = (box[i].min - ray.Origin()[i]) * invDir;
-        double t1 = (box[i].max - ray.Origin()[i]) * invDir;
-        if (invDir < 0.0) std::swap(t0, t1);
-        range.min = std::max(t0, range.min);
-        range.max = std::min(t1, range.max);
-        if (range.max <= range.min)
-            return false;
+        double t0 = (box[i].min - o[i]) * inv[i];
+        double t1 = (box[i].max - o[i]) * inv[i];
+        double lo = t0 < t1 ? t0 : t1;
+        double hi = t0 < t1 ? t1 : t0;
+        tmin = lo > tmin ? lo : tmin;
+        tmax = hi < tmax ? hi : tmax;
     }
-    return true;
+    return tmin < tmax;
 }
 
 
