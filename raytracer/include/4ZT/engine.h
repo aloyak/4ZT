@@ -6,7 +6,9 @@
 
 #include "4ZT/camera.h"
 #include "4ZT/world/world.h"
+
 #include "4ZT/output/image.h"
+#include "4ZT/output/video.h"
 
 #include "4ZT/settings.h"
 
@@ -25,4 +27,4 @@ private:
     Settings m_settings;
 };
 
-} // namespace FourZT
+} // 4zt

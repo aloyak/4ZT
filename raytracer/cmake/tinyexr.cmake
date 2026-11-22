@@ -13,3 +13,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tinyexr)
 
 target_include_directories(tinyexr PUBLIC ${tinyexr_SOURCE_DIR})
+set_target_properties(miniz PROPERTIES POSITION_INDEPENDENT_CODE ON)

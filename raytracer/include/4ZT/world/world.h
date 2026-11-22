@@ -45,6 +45,10 @@ public:
         return m_objects;
     }
 
+    void Clear() {
+        m_objects.clear();
+    }
+
 private:
     // world is made out of a list of objects with the "Object" class
     std::vector<std::unique_ptr<Object>> m_objects;

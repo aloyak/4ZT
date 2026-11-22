@@ -31,6 +31,7 @@ private:
 };
 
 class Image {
+    friend class Video;
 public:
     Image(int w, int h) : m_buffer(w, h) {}
     virtual ~Image() = default;
