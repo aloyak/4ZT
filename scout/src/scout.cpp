@@ -4,11 +4,15 @@
 #include "4ZTScout/gui/gui.h"
 #include "4ZTScout/render/renderer.h"
 
+#include "4ZTScout/filesystem.h"
+
 #include <chrono>
 
 Scout::App::App() {
     m_context.running = &m_running;
     m_running = true;
+
+    FileSystem::Mount("scout");
 
     PushLayer<Platform>();
     if (!m_running) return; // platform failed
@@ -20,6 +24,7 @@ Scout::App::~App() {
     for (auto layer = m_layers.rbegin(); layer != m_layers.rend(); ++layer) {
         (*layer)->OnDetach(m_context);
     }
+    FileSystem::Unmount("scout");
 }
 
 void Scout::App::Run() {

@@ -5,6 +5,8 @@
 #include "4ZTScout/platform/window.h"
 #include "4ZTScout/platform/input.h"
 
+#include <vector>
+
 namespace Scout {
 
 class Platform : public Layer {
@@ -19,9 +21,13 @@ public:
     Window& GetWindow() { return m_window; }
     Input& GetInput() { return m_input; }
 
+    const std::vector<SDL_Event>& GetEvents() const { return m_events; }
+
 private:
     Window m_window;
     Input m_input;
+
+    std::vector<SDL_Event> m_events;
 };
 
 } // scout

@@ -9,6 +9,9 @@
 namespace Scout {
 
 class Window;
+class GUI;
+class VulkanInstance;
+class Swapchain;
 
 class Renderer : public Layer {
 public:
@@ -16,6 +19,9 @@ public:
     void OnDetach(Context& context) override;
     void OnUpdate(float dt, Context& context) override {}
     void OnRender(Context& context) override;
+
+    VulkanInstance& GetVulkanInstance() { return m_vkInstance; }
+    Swapchain& GetSwapchain() { return m_swapchain; }
 
 private:
     static constexpr uint32_t kFramesInFlight = 2;

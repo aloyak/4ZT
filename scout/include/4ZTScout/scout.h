@@ -14,6 +14,8 @@ namespace Scout {
 class Platform;
 class Window;
 class Input;
+class Renderer;
+class GUI;
 
 struct Settings {
     FourZT::Settings& engineSettings;
@@ -26,6 +28,9 @@ struct Settings {
 struct Context {
     Window* window = nullptr;
     Input* input = nullptr;
+    Platform* platform = nullptr;
+    Renderer* renderer = nullptr;
+    GUI* gui = nullptr;
     bool* running = nullptr;
 };
 

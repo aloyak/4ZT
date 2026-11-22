@@ -1,6 +1,7 @@
 #include "4ZTScout/render/renderer.h"
 #include "4ZTScout/scout.h"
 #include "4ZTScout/platform/window.h"
+#include "4ZTScout/gui/gui.h"
 
 #include <cstdio>
 #include <stdexcept>
@@ -10,6 +11,7 @@ void Scout::Renderer::OnAttach(Context& context) {
         m_window = context.window;
         m_vkInstance = VulkanInstance(context);
         m_swapchain.Create(m_vkInstance, m_window->GetHandle());
+        context.renderer = this;
 
         VkDevice device = m_vkInstance.GetDevice();
         for (auto& f : m_frames) {
@@ -86,7 +88,7 @@ void Scout::Renderer::TransitionImage(VkCommandBuffer cmd, VkImage image,
     vkCmdPipelineBarrier2(cmd, &dep);
 }
 
-void Scout::Renderer::OnRender(Context&) {
+void Scout::Renderer::OnRender(Context& context) {
     if (!m_vkInstance.GetDevice() || !m_window) return;
 
     VkDevice device = m_vkInstance.GetDevice();
@@ -146,7 +148,7 @@ void Scout::Renderer::OnRender(Context&) {
         .pColorAttachments = &color,
     };
     vkCmdBeginRendering(cmd, &ri);
-    // TODO: previewer draw calls, GUI draw data
+    if (context.gui) context.gui->RecordDrawData(cmd);
     vkCmdEndRendering(cmd);
 
     TransitionImage(cmd, image,

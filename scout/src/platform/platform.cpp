@@ -22,6 +22,7 @@ void Scout::Platform::OnAttach(Context& context) {
 
     context.window = &m_window;
     context.input = &m_input;
+    context.platform = this;
 }
 
 void Scout::Platform::OnDetach(Context& context) {
@@ -30,13 +31,16 @@ void Scout::Platform::OnDetach(Context& context) {
 
     context.window = nullptr;
     context.input = nullptr;
+    context.platform = nullptr;
 }
 
 void Scout::Platform::OnUpdate(float deltaTime, Context& context) {
     (void)deltaTime;
 
+    m_events.clear();
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        m_events.push_back(event);
         m_input.ProcessEvent(event);
 
         if (event.type == SDL_EVENT_QUIT) {

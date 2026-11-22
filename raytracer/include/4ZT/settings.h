@@ -13,6 +13,7 @@ struct Settings {
 
     // Image Settings
     int outputHeight = 600;
+    int outputWidth = 800; // will be calculated from aspect ratio if not set
     double aspectRatio = 16.0 / 9.0;
     
     // CPU Rendering
