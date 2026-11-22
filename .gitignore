@@ -5,6 +5,7 @@ profiling/
 
 *.ppm
 *.data
+*.zip
 
 PLAN.md
 TODO.md
