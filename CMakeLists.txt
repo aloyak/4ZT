@@ -12,5 +12,5 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(raytracer)
-add_subdirectory(client)
+add_subdirectory(standalone)
 add_subdirectory(scout)
