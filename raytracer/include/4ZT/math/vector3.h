@@ -62,15 +62,15 @@ inline Vec3 hadamard(const Vec3& a, const Vec3& b) {
 }
 
 // Uniform random in [0, 1) (thread-safe)
-inline double randomDouble() {
+inline double RandomDouble() {
     thread_local std::mt19937 gen(std::random_device{}());
     thread_local std::uniform_real_distribution<double> dist(0.0, 1.0);
     return dist(gen);
 }
 
 inline Vec3 RandomUnitVector() {
-    double a = randomDouble() * 2.0 * M_PI;
-    double z = randomDouble() * 2.0 - 1.0;
+    double a = RandomDouble() * 2.0 * M_PI;
+    double z = RandomDouble() * 2.0 - 1.0;
     double r = std::sqrt(1 - z*z);
     return Vec3(r * std::cos(a), r * std::sin(a), z);
 }
@@ -89,7 +89,7 @@ inline Vec3 Refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
 /// TODO: no rejection sampling
 inline Vec3 RandomInUnitSphere() {
     while (true) {
-        auto p = Vec3(randomDouble(), randomDouble(), randomDouble()) * 2.0 - Vec3(1, 1, 1);
+        auto p = Vec3(RandomDouble(), RandomDouble(), RandomDouble()) * 2.0 - Vec3(1, 1, 1);
         if (p.lengthSquared() >= 1) continue;
         return p;
     }

@@ -1,3 +1,4 @@
+#include "4ZT/math/math.h"
 #include "4ZT/render/cpu-mt/cpu_renderer.h"
 #include "4ZT/render/cpu-mt/cpu_intersect.h"
 #include "4ZT/render/cpu-mt/cpu_scatter.h"
@@ -57,14 +58,14 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
                 Color pixelColor(0, 0, 0);
                 /// random sampling TODO: implement different sampling strategies (jittered)
                 for (int s = 0; s < settings.samplesPerPixel; ++s) {
-                    double offset_x = randomDouble() - 0.5;   // [-0.5, 0.5)
-                    double offset_y = randomDouble() - 0.5;
+                    double offset_x = RandomDouble() - 0.5;   // [-0.5, 0.5)
+                    double offset_y = RandomDouble() - 0.5;
 
                     auto pixel_sample = pixelat00 + delta_u * (x + offset_x) + delta_v * (y + offset_y);
                     auto dir = (pixel_sample - camera.position).normalize();
                     Ray ray(camera.position, dir);
 
-                    pixelColor += TraceRay(ray, world, camera, bvh, settings.maxDepth) * (1.0/settings.samplesPerPixel);
+                    pixelColor += TraceRay(ray, world, camera, bvh, settings, settings.maxDepth) * (1.0/settings.samplesPerPixel);
                 }
                 img.at(x, y) = pixelColor;
             }
@@ -80,7 +81,7 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     std::vector<std::thread> m_threads;
     m_threads.reserve(m_allowedThreads - 1);
     for (int t = 1; t < m_allowedThreads; ++t)
-    m_threads.emplace_back(worker, t);
+        m_threads.emplace_back(worker, t);
 
     // Make sure the current thread also does some work!
     worker(0);
@@ -93,25 +94,43 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     return img;
 }
 
-Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const Camera& cam, const BVH& bvh, int depth) const {
-    if (depth <= 0) 
+Color FourZT::CPURenderer::TraceRay(const Ray& ray, const World& world, const Camera& cam,
+                                    const BVH& bvh, const Settings& settings, int depth) const {
+    if (depth <= 0)
         return Color(0, 0, 0);
-    
+
     HitRecord record;
-    if (Intersector::Hit(world, bvh, ray, Interval(0.001, infinity), record)) { 
+    if (Intersector::Hit(world, bvh, ray, Interval(0.001, infinity), record)) {
         Ray scattered;
         Color attenuation;
 
         Color emitted = Emitter::Emitted(*record.material);
 
         if (Scatterer::Scatter(*record.material, ray, record, attenuation, scattered)) {
-            return emitted + hadamard(attenuation, TraceRay(scattered, world, cam, bvh, depth - 1));
-        }
-        
-        return emitted; 
-    }    
+            double survival = 1.0;
 
-    if (!cam.useSkybox) 
+            if (settings.enableRussianRoulette) {
+                int bounces = settings.maxDepth - depth;
+
+                if (bounces >= settings.minDepth) {
+                    // Use the brightest channel of the attenuation as survival chance.
+                    // Dark surfaces die quickly, bright ones live longer.
+                    survival = std::max({attenuation.x, attenuation.y, attenuation.z});
+                    survival = std::clamp(survival, 0.05, 0.95);
+
+                    if (RandomDouble() >= survival)
+                        return emitted;
+                }
+            }
+
+            Color incoming = TraceRay(scattered, world, cam, bvh, settings, depth - 1);
+            return emitted + hadamard(attenuation, incoming) / survival;
+        }
+
+        return emitted;
+    }
+
+    if (!cam.useSkybox)
         return cam.background;
 
     Vec3 unit_direction = ray.Direction().normalize();

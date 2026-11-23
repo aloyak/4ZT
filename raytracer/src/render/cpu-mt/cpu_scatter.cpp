@@ -54,7 +54,7 @@ bool FourZT::Scatterer::DielectricScatter(
     bool cannotRefract = ri * sin_theta > 1.0;
     Vec3 direction;
 
-    if (cannotRefract || Reflectance(cos_theta, ri) > randomDouble())
+    if (cannotRefract || Reflectance(cos_theta, ri) > RandomDouble())
         direction = Reflect(unit_direction, record.normal);
     else
         direction = Refract(unit_direction, record.normal, ri);
