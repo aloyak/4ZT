@@ -30,8 +30,10 @@ struct HitRecord {
 class Intersector {
 public:
     static bool Hit(const World& world, const BVH& bvh, const Ray& ray, Interval range, HitRecord& record);
-    
 private:
+    // Hit without BVH acceleration
+    static bool WorldHit(const World& world, const Ray& ray, Interval range, HitRecord& record);
+    
     static bool AABBHit(const AABB& box, const Ray& ray, Interval range);
     static bool ObjectHit(const Object& object, const Ray& ray, Interval range, HitRecord& record);
 

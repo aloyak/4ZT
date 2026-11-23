@@ -10,6 +10,7 @@ struct Settings {
     
     int samplesPerPixel = 100; // SSAA
     int maxDepth = 50;
+    int minDepth = 5;
 
     // Image Settings
     int outputHeight = 600;
@@ -20,6 +21,11 @@ struct Settings {
     int targetThreads = 4;
 
     // GPU Rendering
+
+    // Advanced
+    bool enableBVH = true;
+    bool enableDenoising = true; // TODO
+    bool enableRussianRoulette = true;
 };
 
 }

@@ -40,8 +40,10 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     auto viewport_upper_left = camera.position - (camera.focalLength * w) - viewport_u/2 - viewport_v/2;
     auto pixelat00 = viewport_upper_left + (delta_u + delta_v) * 0.5;
 
-
-    BVH bvh = BVH::Build(world);
+    // An empty BVH lets Intersector::Hit fall back to testing without BVH
+    BVH bvh{};
+    if (settings.enableBVH)
+        bvh = BVH::Build(world);
     
     std::atomic<int> nextRow(0);
     std::atomic<int> rowsDone(0);

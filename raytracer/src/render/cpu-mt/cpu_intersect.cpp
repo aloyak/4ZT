@@ -14,7 +14,7 @@ struct NodeStack {
 };
 
 bool FourZT::Intersector::Hit(const World& world, const BVH& bvh, const Ray& ray, Interval range, HitRecord& record) {
-    if (bvh.nodes.empty()) return false;
+    if (bvh.nodes.empty()) return WorldHit(world, ray, range, record);
 
     const auto& objects = world.Get();
     bool hitAny = false;
@@ -44,6 +44,22 @@ bool FourZT::Intersector::Hit(const World& world, const BVH& bvh, const Ray& ray
         }
     }
     
+    return hitAny;
+}
+
+// hit without bvh
+bool FourZT::Intersector::WorldHit(const World& world, const Ray& ray, Interval range, HitRecord& record) {
+    bool hitAny = false;
+    double closest = range.max;
+    HitRecord temp;
+
+    for (const auto& object : world.Get()) {
+        if (ObjectHit(*object, ray, Interval(range.min, closest), temp)) {
+            hitAny = true;
+            closest = temp.t;
+            record = temp;
+        }
+    }
     return hitAny;
 }
 
