@@ -9,7 +9,7 @@
 ## Overview
 4ZT is a physically based offline path tracer rendering engine. Its abstract rendering class allows for computation with multithreading CPU and GPU acceleration.
 
-The engine is designed as a static API and is intended to be used as a library for rendering applications. As showcased by the demo `client` application as well as the `scout` real time renderer.
+The engine is designed as a static API and is intended to be used as a library for rendering applications. As showcased by the demo `standalone` application as well as the `scout` real time renderer.
 
 ### Features
 - Image (JPEG, PNG, PPM, HDR and EXR) and Video (MP4, MKV, GIF) outputs
@@ -19,10 +19,11 @@ The engine is designed as a static API and is intended to be used as a library f
 - HDR output
 
 ## Project Structure
-Each project has a `cmake`, `src`, and `include` folders
+Each project has a `cmake`, `src`, and `include` folders.
+
 This repository contains the following projects:
 - `raytracer`: The core rendering engine library
-- `client`: A simple demo application that renders the demo scene right away
+- `standalone`: A simple headless demo application that renders the demo scene right away
 - `scout`: A real time renderer that allows for scene manipulation and rendering
 
 ## Showcase
