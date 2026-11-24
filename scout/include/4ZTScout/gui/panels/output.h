@@ -171,8 +171,9 @@ protected:
 
         ImGui::Spacing();
         ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing());
-        ImGui::SetNextItemWidth(200);
-        ImGui::Button("Render!");
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.2f, 0.4f, 1.0f));
+        ImGui::Button("Render!", ImVec2(-1.0f, 0.0f));
+        ImGui::PopStyleColor();
     }
 
 private:

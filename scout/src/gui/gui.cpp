@@ -1,4 +1,5 @@
 #include "4ZTScout/gui/gui.h"
+#include "4ZTScout/gui/styles.h"
 #include "4ZTScout/gui/panels/scene.h"
 #include "4ZTScout/gui/panels/console.h"
 #include "4ZTScout/gui/panels/hierarchy.h"
@@ -88,6 +89,8 @@ void Scout::GUI::OnAttach(Context& context) {
         return;
     }
 
+    Styles::ApplyDarkTheme();
+
     AddPanel<ScenePanel>();
     AddPanel<HierarchyPanel>();
     AddPanel<InspectorPanel>();
@@ -117,7 +120,6 @@ void Scout::GUI::OnDetach(Context& context) {
 }
 
 void Scout::GUI::OnUpdate(float dt, Context& context) {
-    (void)dt;
     if (!m_initialized || !context.platform) return;
 
     for (const SDL_Event& event : context.platform->GetEvents())
@@ -128,7 +130,7 @@ void Scout::GUI::OnUpdate(float dt, Context& context) {
     ImGui::NewFrame();
 
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),
-                                 ImGuiDockNodeFlags_PassthruCentralNode);
+                                 ImGuiDockNodeFlags_PassthruCentralNode);    
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -160,6 +162,9 @@ void Scout::GUI::OnUpdate(float dt, Context& context) {
     for (const auto& panel : m_panels)
         panel->Render(context);
 
+    // Theme debugging
+    //ImGui::ShowStyleEditor();
+   
     ImGui::Render();
 }
 
