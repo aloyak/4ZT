@@ -1,10 +1,10 @@
 # 4ZT
 
 <div align="center">
-  <img src="showcase/cornellbox.jpg" alt="cornell box 2" width="500"/>
+  <img src="showcase/cornellbox_1.jpg" alt="cornell box 2" width="500"/>
 </div>
 
-> `showcase/cornellbox.jpg` rendered with 4ZT v0.5.0 at 10000 spp
+> `showcase/cornellbox_1.jpg` rendered with 4ZT v0.5.0 at 10000 spp
 
 ## Overview
 4ZT is a physically based offline path tracer rendering engine. Its abstract rendering class allows for computation with multithreading CPU and GPU acceleration.
