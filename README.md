@@ -1,10 +1,10 @@
 # 4ZT
 
 <div align="center">
-  <img src="showcase/cornellbox_2.jpg" alt="cornell box 2" width="300"/>
+  <img src="showcase/cornellbox.jpg" alt="cornell box 2" width="500"/>
 </div>
 
-> `showcase/cornellbox_2.jpg` rendered with 4ZT v0.5.0
+> `showcase/cornellbox.jpg` rendered with 4ZT v0.5.0 at 10000 spp
 
 ## Overview
 4ZT is a physically based offline path tracer rendering engine. Its abstract rendering class allows for computation with multithreading CPU and GPU acceleration.
@@ -27,8 +27,8 @@ This repository contains the following projects:
 - `scout`: A real time renderer that allows for scene manipulation and rendering
 
 ## Showcase
-<img src="showcase/videodemo.gif" alt="cornell box 1" width="300"/>
-<img src="showcase/cornellbox.jpg" alt="cornell box 1" width="300"/>
+<img src="showcase/videodemo.gif" alt="cornell box 1" width="250"/>
+<img src="showcase/cornellbox_2.jpg" alt="cornell box 1" width="250"/>
 
 > Video demo (v0.5.0) and a rendered image of the Cornell Box scene (v 0.4.0).
 
