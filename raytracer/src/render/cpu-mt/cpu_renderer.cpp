@@ -4,26 +4,29 @@
 #include "4ZT/render/cpu-mt/cpu_scatter.h"
 #include "4ZT/render/cpu-mt/cpu_emitted.h"
 
-#include <iomanip>
+#include <algorithm>
 #include <atomic>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
 #include <vector>
+#include <thread>
 
-FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
-                                         const Camera& camera,
-                                         const World& world) {
-    // Determine the number of threads to use
-    m_allowedThreads = std::max(1, std::min(m_maxAvailiableThreads, settings.targetThreads));
+FourZT::CPURenderer::CPURenderer(const Settings& settings) {
+    int hw = static_cast<int>(std::thread::hardware_concurrency());
+    m_allowedThreads = std::max(1, std::min(hw, settings.targetThreads)); // hw can be 0
 
-    int imgHeight = settings.outputHeight;
-    int imgWidth = settings.outputHeight * settings.aspectRatio;
-    Image img(imgWidth, imgHeight);
-    
-    // viewport setup
-    // virtual grid where rays are casted from
+    m_imgHeight = settings.outputHeight;
+    m_imgWidth  = static_cast<int>(std::lround(settings.outputHeight * settings.aspectRatio));
+
+    m_invSamples = 1.0 / settings.samplesPerPixel;
+}
+
+FourZT::CPURenderer::ViewportInfo FourZT::CPURenderer::ComputeViewport(const Camera& camera) const {
     auto theta = torads(camera.fov);
     auto h = std::tan(theta/2);
-    m_viewportHeight = 2 * h * camera.focalLength;
-    m_viewportWidth  = m_viewportHeight * (double(imgWidth) / imgHeight);
+    double viewportHeight = 2 * h * camera.focalLength;
+    double viewportWidth  = viewportHeight * (double(m_imgWidth) / m_imgHeight);
 
     // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
     const auto vup = Vec3(0, 1, 0); // Up direction in world space
@@ -31,62 +34,71 @@ FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
     auto u = cross(vup, w).normalize();
     auto v = cross(w, u);
 
-    Vec3 viewport_u = m_viewportWidth * u;    // Vector across viewport horizontal edge
-    Vec3 viewport_v = m_viewportHeight * v; 
+    Vec3 viewport_u = viewportWidth * u;    // Vector across viewport horizontal edge
+    Vec3 viewport_v = viewportHeight * v;
 
-    auto delta_u = viewport_u / imgWidth;
-    auto delta_v = viewport_v / imgHeight;
+    ViewportInfo vp;
+    vp.origin = camera.position;
+    vp.deltaU = viewport_u / m_imgWidth;
+    vp.deltaV = viewport_v / m_imgHeight;
 
-    // Calculate the location of the upper left pixel.
-    auto viewport_upper_left = camera.position - (camera.focalLength * w) - viewport_u/2 - viewport_v/2;
-    auto pixelat00 = viewport_upper_left + (delta_u + delta_v) * 0.5;
+    auto upperLeft = camera.position - (camera.focalLength * w) - viewport_u / 2 - viewport_v / 2;
+    vp.pixel00 = upperLeft + (vp.deltaU + vp.deltaV) * 0.5;
+    return vp;
+}
 
-    // An empty BVH lets Intersector::Hit fall back to testing without BVH
+FourZT::Image FourZT::CPURenderer::Render(const Settings& settings,
+                                          const Camera& camera,
+                                          const World& world) {
+    Image img(m_imgWidth, m_imgHeight);
+
+    const ViewportInfo vp = ComputeViewport(camera);
+
     BVH bvh{};
     if (settings.enableBVH)
         bvh = BVH::Build(world);
-    
+
     std::atomic<int> nextRow(0);
     std::atomic<int> rowsDone(0);
 
     auto worker = [&](int threadId) {
         while (true) {
             int y = nextRow.fetch_add(1);
-            if (y >= imgHeight) break;
+            if (y >= m_imgHeight) break;
 
-            for (int x = 0; x < imgWidth; ++x) {
+            for (int x = 0; x < m_imgWidth; ++x) {
                 Color pixelColor(0, 0, 0);
                 /// random sampling TODO: implement different sampling strategies (jittered)
                 for (int s = 0; s < settings.samplesPerPixel; ++s) {
                     double offset_x = RandomDouble() - 0.5;   // [-0.5, 0.5)
                     double offset_y = RandomDouble() - 0.5;
 
-                    auto pixel_sample = pixelat00 + delta_u * (x + offset_x) + delta_v * (y + offset_y);
-                    auto dir = (pixel_sample - camera.position).normalize();
-                    Ray ray(camera.position, dir);
+                    auto pixel_sample = vp.pixel00 + vp.deltaU * (x + offset_x) + vp.deltaV * (y + offset_y);
+                    auto dir = (pixel_sample - vp.origin).normalize();
+                    Ray ray(vp.origin, dir);
 
-                    pixelColor += TraceRay(ray, world, camera, bvh, settings, settings.maxDepth) * (1.0/settings.samplesPerPixel);
+                    pixelColor += TraceRay(ray, world, camera, bvh, settings, settings.maxDepth);
                 }
-                img.at(x, y) = pixelColor;
+                img.at(x, y) = pixelColor * m_invSamples; // divide once not per sample
             }
 
             int done = rowsDone.fetch_add(1) + 1;
             if (threadId == 0)
                 std::cerr << "\rRendering: " << std::fixed << std::setprecision(1)
-                        << (100.0 * done / imgHeight) << "% " << std::flush;
+                          << (100.0 * done / m_imgHeight) << "% " << std::flush;
         }
     };
 
     // Spawn N-1 helpers (none if N == 1), then the calling thread works too
-    std::vector<std::thread> m_threads;
-    m_threads.reserve(m_allowedThreads - 1);
+    std::vector<std::thread> threads;
+    threads.reserve(m_allowedThreads - 1);
     for (int t = 1; t < m_allowedThreads; ++t)
-        m_threads.emplace_back(worker, t);
+        threads.emplace_back(worker, t);
 
     // Make sure the current thread also does some work!
     worker(0);
 
-    for (auto& thread : m_threads)
+    for (auto& thread : threads)
         thread.join(); // Wait for all threads to finish
 
     std::cerr << "\rComplete.               " << std::endl;

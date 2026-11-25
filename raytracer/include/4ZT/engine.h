@@ -25,6 +25,7 @@ public:
 
 private:
     Settings m_settings;
+    std::unique_ptr<Renderer> m_renderer;
 };
 
 } // 4zt
