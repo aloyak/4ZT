@@ -2,7 +2,7 @@
 
 namespace FourZT {
 
-enum class Backend { CPU, GPU };
+enum class Backend { CPU, Vulkan, HIPRT };
 
 struct Settings {
     // General
@@ -20,7 +20,10 @@ struct Settings {
     // CPU Rendering
     int targetThreads = 4;
 
-    // GPU Rendering
+    // Vulkan Rendering
+    int targetDeviceIndex = 0; // TODO
+
+    // HIP-RT Rendering
 
     // Advanced
     bool enableBVH = true;

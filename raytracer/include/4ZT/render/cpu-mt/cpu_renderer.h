@@ -24,19 +24,9 @@ public:
                    const BVH& bvh, const Settings& settings, int depth = 0) const;
 
 private:
-    struct ViewportInfo {
-        Vec3 origin;     // camera position
-        Vec3 pixel00;    // center of pixel x=0 y=0
-        Vec3 deltaU;     // step per pixel horizontally
-        Vec3 deltaV;     // step per pixel vertically
-    };
-
-    ViewportInfo ComputeViewport(const Camera& camera) const;
-
-    // static
     int m_allowedThreads;
-    int m_imgHeight;
-    int m_imgWidth;
+    int m_imgHeight = 0;
+    int m_imgWidth = 0;
     double m_invSamples;
 };
 
