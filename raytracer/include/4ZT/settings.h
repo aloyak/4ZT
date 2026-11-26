@@ -21,7 +21,7 @@ struct Settings {
     int targetThreads = 4;
 
     // Vulkan Rendering
-    int targetDeviceIndex = 0; // TODO
+    int targetDeviceIndex = -1; // default to discrete GPU
 
     // HIP-RT Rendering
 

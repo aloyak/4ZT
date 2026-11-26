@@ -29,8 +29,8 @@ protected:
         : m_kind(kind), m_material(std::move(material)) {}
         
 private:
-    std::shared_ptr<Material> m_material; 
     ObjectKind m_kind;
+    std::shared_ptr<Material> m_material; 
 };
 
 class Sphere : public Object {
