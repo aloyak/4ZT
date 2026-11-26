@@ -11,12 +11,14 @@
 #include "4ZT/output/video.h"
 
 #include "4ZT/settings.h"
+#include "4ZT/filesystem.h"
 
 namespace FourZT {
 
 class Engine {
 public:
     explicit Engine(const Settings& settings);
+    ~Engine();
 
     Engine(const Engine&) = delete;
     Engine& operator=(const Engine&) = delete;
