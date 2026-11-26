@@ -12,8 +12,8 @@ include(volk)
 include(vma)
 include(vkbootstrap)
 
-# TODO: compile the slang shaders at build time
-# theyre at raytracer/compute/*.slang
+# compiles shaders/*.slang to spv and puts them right next to the executable
+include(slang)
 
 file(GLOB_RECURSE RAYTRACER_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 

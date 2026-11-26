@@ -6,3 +6,5 @@ file(GLOB_RECURSE STANDALONE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_executable(standalone ${STANDALONE_SOURCES})
 target_include_directories(standalone PRIVATE include)
 target_link_libraries(standalone PRIVATE FourZT::raytracer)
+
+deploy_shaders(standalone)

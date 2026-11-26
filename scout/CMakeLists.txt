@@ -21,3 +21,5 @@ add_custom_command(TARGET scout POST_BUILD
         "${CMAKE_CURRENT_SOURCE_DIR}/resources"
         "$<TARGET_FILE_DIR:scout>/resources"
 )
+
+deploy_shaders(scout)
