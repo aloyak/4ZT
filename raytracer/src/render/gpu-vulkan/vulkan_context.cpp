@@ -67,28 +67,44 @@ void FourZT::VulkanContext::Initialize(const Settings& settings) {
         features13.synchronization2 = VK_TRUE;
 
         vkb::PhysicalDeviceSelector selector{ vkbInstance };   // headless: no surface
-        if (settings.targetDeviceIndex < 0) { // "auto"
-            selector
+        selector
             .set_minimum_version(1, 3)
             .set_required_features(features10)
             .set_required_features_12(features12)
             .set_required_features_13(features13)
             .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete);
-        } else {
-            selector
-            .set_minimum_version(1, 3)
-            .set_required_features(features10)
-            .set_required_features_12(features12)
-            .set_required_features_13(features13);
 
-            auto devices = Unwrap(selector.select_devices(), "Failed to enumerate Vulkan devices");
-            if (settings.targetDeviceIndex >= static_cast<int>(devices.size())) {
+        auto devices = Unwrap(selector.select_devices(), "Failed to enumerate Vulkan devices");
+        if (devices.empty())
+            throw std::runtime_error("No suitable GPU found");
+
+        // Show what the indices mean
+        // for (size_t i = 0; i < devices.size(); ++i)
+        //     std::fprintf(stderr, "GPU %zu: %s\n", i, devices[i].name.c_str());
+
+        // if auto, score the availiable gpus, discrete beats everything else, then the most device-local memory (VRAM)
+        auto Score = [](const vkb::PhysicalDevice& d) {
+            uint64_t vram = 0;
+            for (uint32_t i = 0; i < d.memory_properties.memoryHeapCount; ++i)
+                if (d.memory_properties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+                    vram += d.memory_properties.memoryHeaps[i].size;
+            uint64_t discrete = (d.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) ? 1ull << 62 : 0;
+            return discrete + (vram >> 20);   // MiB
+        };
+
+        size_t pick = 0;
+        if (settings.targetDeviceIndex < 0) {
+            for (size_t i = 1; i < devices.size(); ++i)
+                if (Score(devices[i]) > Score(devices[pick])) pick = i;
+        } else {
+            if (settings.targetDeviceIndex >= static_cast<int>(devices.size()))
                 throw std::runtime_error("Invalid target device index: " + std::to_string(settings.targetDeviceIndex));
-            }
-            selector.set_name(devices[settings.targetDeviceIndex].properties.deviceName);
+            pick = size_t(settings.targetDeviceIndex);
         }
-        vkb::PhysicalDevice vkbPhysical = Unwrap(selector.select(), "Failed to select a suitable GPU");
+
+        vkb::PhysicalDevice vkbPhysical = devices[pick];
         m_physicalDevice = vkbPhysical.physical_device;
+        std::fprintf(stderr, "Using GPU \"%s\"\n", vkbPhysical.name.c_str());
 
         // logical device
         vkb::Device vkbDevice = Unwrap(vkb::DeviceBuilder{ vkbPhysical }.build(), "Device creation");
