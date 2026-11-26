@@ -1,8 +1,10 @@
 # 4ZT
 
 <div align="center">
-  <img src="showcase/videodemo_2.gif" alt="cornell box 2" width="450"/>
+  <img src="showcase/videodemo_2.webp" alt="cornell box 2" width="450"/>
 </div>
+
+> converted to webp for better compression (there's a known bug in the render too, working on it!) 
 
 ## Overview
 4ZT is a physically based offline path tracer rendering engine. It is designed to be a simple and easy to use library for rendering applications. The project also includes a realtime editor that allows you to setup a scene in a more interactive way rather than writing the scene in code
