@@ -19,16 +19,36 @@ The engine is designed as a static API and is intended to be used as a library f
 - HDR output
 
 ## Project Structure
-Each project has a `cmake`, `src`, and `include` folders.
-
 This repository contains the following projects:
 - `raytracer`: The core rendering engine library
 - `standalone`: A simple headless demo application that renders the demo scene right away
 - `scout`: A real time renderer that allows for scene manipulation and rendering
 
+## Comparison
+Side by side with Blender Cycles (Blender 5.2.3 LTS)
+
+Blender project file: `showcase/comparison/blender_scene.blend`
+<div align="center">
+
+  4ZT             |  Blender Cycles
+:-------------------------:|:-------------------------:
+![](showcase/comparison/4zt_out.jpg) 07.857s | ![](showcase/comparison/blender_out.jpg) 61.502s
+</div>
+
+> [!WARNING]  
+> This might not be a fair comparison! Although it was as similar as possible
+
+### Comparison Settings
+- Render Device: **GPU** (RX 7900 XT)
+- Resolution: **1000x1000**, FOV: **40°**
+- Samples per Pixel: **10000**
+- Max Depth: **50**
+- Denoising: **OFF**
+
 ## Showcase
-<img src="showcase/videodemo.gif" alt="cornell box 1" width="250"/>
-<img src="showcase/cornellbox_2.jpg" alt="cornell box 1" width="250"/>
+<img src="showcase/videodemo.gif" alt="cornell box 1" width="200"/>
+<img src="showcase/cornellbox_2.jpg" alt="cornell box 1" width="200"/>
+<img src="showcase/showcase.jpg" alt="demo" width="200"/>
 
 > Video demo (v0.5.0) and a rendered image of the Cornell Box scene (v 0.4.0).
 
@@ -39,18 +59,6 @@ It currently uses a simple dear imgui interface but I would like to implement so
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for more information.
-
-## TODO Features
-Pure Engine Features:
-- Support for meshes
-- Texture mapping
-- Volumetric rendering
-- Special materials: cloth, hair, skin, etc.
-
-Scout Editor Features (WIP):
-- Animation?
-- Vertex manipulation
-
 
 ## Acknowledgements
 Resources that helped a lot

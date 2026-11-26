@@ -4,7 +4,6 @@ build/
 profiling/
 
 *.ppm
-*.data
 *.zip
 
 PLAN.md
