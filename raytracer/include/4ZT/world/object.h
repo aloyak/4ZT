@@ -13,7 +13,8 @@ namespace FourZT {
 enum class ObjectKind {
     Sphere,
     Quad,
-    //Triangle,
+    Triangle
+    // TODO: cylinder, cone, torus?
 };
 
 class Object {
@@ -78,6 +79,27 @@ private:
     Vec3 m_w;
 };
 
-/// TODO: plane, triangle, mesh...
+class Triangle : public Object {
+public:
+    Triangle(const Point3& p0, const Point3& p1, const Point3& p2, std::shared_ptr<Material> material)
+        : Object(ObjectKind::Triangle, std::move(material)), m_p0(p0), m_p1(p1), m_p2(p2)
+    {
+        Vec3 n = cross(p1 - p0, p2 - p0);
+        m_normal = n.normalize();
+        m_w = n / dot(n, n);
+    }
+
+    const Point3& P0() const { return m_p0; }
+    const Point3& P1() const { return m_p1; }
+    const Point3& P2() const { return m_p2; }
+
+    const Vec3& Normal() const { return m_normal; }
+    const Vec3& W() const { return m_w; }
+
+private:
+    Point3 m_p0, m_p1, m_p2;
+    Vec3 m_normal;
+    Vec3 m_w;
+};
 
 } // 4zt

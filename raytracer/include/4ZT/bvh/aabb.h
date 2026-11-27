@@ -47,6 +47,20 @@ public:
                 );
                 return AABB(min, max);
             }
+            case ObjectKind::Triangle: {
+                const auto& t = static_cast<const Triangle&>(object);
+                Point3 min(
+                    std::min({t.P0().x, t.P1().x, t.P2().x}),
+                    std::min({t.P0().y, t.P1().y, t.P2().y}),
+                    std::min({t.P0().z, t.P1().z, t.P2().z})
+                );
+                Point3 max(
+                    std::max({t.P0().x, t.P1().x, t.P2().x}),
+                    std::max({t.P0().y, t.P1().y, t.P2().y}),
+                    std::max({t.P0().z, t.P1().z, t.P2().z})
+                );
+                return AABB(min, max);
+            }
             default:
                 return AABB();   // empty box
         }

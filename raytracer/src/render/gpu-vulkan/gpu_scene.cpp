@@ -78,6 +78,16 @@ FourZT::GpuSceneData FourZT::BuildGpuScene(const World& world) {
                 Set4(p.e, q.W().x, q.W().y, q.W().z);
                 break;
             }
+            case ObjectKind::Triangle: {
+                const auto& t = static_cast<const Triangle&>(*obj);
+                p.kind = kGpuPrimTriangle;
+                Set4(p.a, t.P0().x, t.P0().y, t.P0().z);
+                Set4(p.b, t.P1().x, t.P1().y, t.P1().z);
+                Set4(p.c, t.P2().x, t.P2().y, t.P2().z);
+                Set4(p.d, t.Normal().x, t.Normal().y, t.Normal().z);
+                Set4(p.e, t.W().x, t.W().y, t.W().z);
+                break;
+            }
             default:
                 continue;   // kinds the GPU doesn't know yet are skipped, like CPU ObjectHit's default
         }

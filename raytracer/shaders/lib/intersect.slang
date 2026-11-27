@@ -33,12 +33,13 @@ bool HitSphere(GpuPrimitive s, Ray ray, float tMin, float tMax, inout HitRecord 
     return true;
 }
 
+static float Epsilon = 1e-6;
 bool HitQuad(GpuPrimitive q, Ray ray, float tMin, float tMax, inout HitRecord rec)
 {
     float3 Q = q.a.xyz, u = q.b.xyz, v = q.c.xyz, n = q.d.xyz, w = q.e.xyz;
 
     float denom = dot(n, ray.dir);
-    if (abs(denom) < 1e-6) return false;
+    if (abs(denom) < Epsilon) return false;
 
     float t = (dot(n, Q) - dot(n, ray.origin)) / denom;
     if (t <= tMin || t >= tMax) return false;
@@ -56,6 +57,37 @@ bool HitQuad(GpuPrimitive q, Ray ray, float tMin, float tMax, inout HitRecord re
     return true;
 }
 
+// Möller–Trumbore algorithm
+bool HitTriangle(GpuPrimitive t, Ray ray, float tMin, float tMax, inout HitRecord rec)
+{
+    float3 p0 = t.a.xyz;
+    float3 e1 = t.b.xyz - p0;
+    float3 e2 = t.c.xyz - p0;
+
+    float3 pvec = cross(ray.dir, e2);
+    float det = dot(e1, pvec);
+    if (abs(det) < Epsilon) return false; // parallel to triangle
+
+    float invDet = 1.0 / det;
+    float3 tvec = ray.origin - p0;
+
+    float u = dot(tvec, pvec) * invDet;
+    if (u < 0.0 || u > 1.0) return false;
+
+    float3 qvec = cross(tvec, e1);
+    float v = dot(ray.dir, qvec) * invDet;
+    if (v < 0.0 || u + v > 1.0) return false;
+
+    float hitT = dot(e2, qvec) * invDet;
+    if (hitT <= tMin || hitT >= tMax) return false;
+
+    rec.t = hitT;
+    rec.point = ray.origin + hitT * ray.dir;
+    rec.material = t.material;
+    SetFaceNormal(rec, ray, normalize(cross(e1, e2)));
+    return true;
+}
+
 // Brute force over every primitive, same as Intersector::WorldHit
 // in other words, no bvh
 bool HitWorld(StructuredBuffer<GpuPrimitive> prims, uint count,
@@ -67,10 +99,14 @@ bool HitWorld(StructuredBuffer<GpuPrimitive> prims, uint count,
 
     for (uint i = 0; i < count; ++i) {
         GpuPrimitive p = prims[i];
-        HitRecord tmp  = (HitRecord)0;
-        bool hit = (p.kind == PRIM_SPHERE) ? HitSphere(p, ray, tMin, closest, tmp)
-                 : (p.kind == PRIM_QUAD)   ? HitQuad  (p, ray, tMin, closest, tmp)
-                 : false;
+        HitRecord tmp = (HitRecord)0;
+        bool hit = false;
+        switch (p.kind) {
+            case PRIM_SPHERE:   hit = HitSphere(p, ray, tMin, closest, tmp); break;
+            case PRIM_QUAD:     hit = HitQuad(p, ray, tMin, closest, tmp); break;
+            case PRIM_TRIANGLE: hit = HitTriangle(p, ray, tMin, closest, tmp); break;
+        }
+
         if (hit) {
             hitAny  = true;
             closest = tmp.t;

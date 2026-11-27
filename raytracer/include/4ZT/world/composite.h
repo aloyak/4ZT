@@ -104,4 +104,19 @@ private:
     std::shared_ptr<Material> m_material;
 };
 
+/// TODO: mesh made out of triangles
+class Mesh : public Composite {
+public:
+    Mesh(const std::string& path, std::shared_ptr<Material> material)
+        : m_path(path), m_material(std::move(material)) {}
+    
+protected:
+    void Build(std::vector<std::unique_ptr<Object>>& out) const override {}
+
+private:
+    std::string m_path;
+    // this is just for now, meshes should support multiple materials
+    std::shared_ptr<Material> m_material; 
+};
+
 } // 4zt

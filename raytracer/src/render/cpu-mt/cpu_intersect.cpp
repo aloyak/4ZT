@@ -87,8 +87,8 @@ bool FourZT::Intersector::ObjectHit(const Object& object, const Ray& ray, Interv
             return SphereHit(static_cast<const Sphere&>(object), ray, range, record);
         case ObjectKind::Quad:
             return QuadHit(static_cast<const Quad&>(object), ray, range, record);
-        //case ObjectKind::Triangle:
-        //case ObjectKind::Mesh:
+        case ObjectKind::Triangle:
+            return TriangleHit(static_cast<const Triangle&>(object), ray, range, record);
         default:
             return false;
     }
@@ -122,12 +122,13 @@ bool FourZT::Intersector::SphereHit(const Sphere& sphere, const Ray& ray, Interv
     return true;
 }
 
+static constexpr double Epsilon = 1e-8;
 bool FourZT::Intersector::QuadHit(const Quad& quad, const Ray& ray, Interval range, HitRecord& record) {
     const Vec3& u = quad.U();
     const Vec3& v = quad.V();
 
     double denom = dot(quad.Normal(), ray.Direction());
-    if (std::abs(denom) < 1e-8) return false;
+    if (std::abs(denom) < Epsilon) return false;
 
     double D = dot(quad.Normal(), quad.Q());
     double t = (D - dot(quad.Normal(), ray.Origin())) / denom;
@@ -144,5 +145,35 @@ bool FourZT::Intersector::QuadHit(const Quad& quad, const Ray& ray, Interval ran
     record.point = p;
     record.SetFaceNormal(ray, quad.Normal());
     record.material = quad.GetMaterial();
+    return true;
+}
+
+bool FourZT::Intersector::TriangleHit(const Triangle& triangle, const Ray& ray,
+                                      Interval range, HitRecord& record) {
+    const Point3& p0 = triangle.P0();
+    Vec3 e1 = triangle.P1() - p0;
+    Vec3 e2 = triangle.P2() - p0;
+
+    Vec3 pvec = cross(ray.Direction(), e2);
+    double det = dot(e1, pvec);
+    if (std::abs(det) < 1e-12) return false;   // parallel to triangle
+
+    double invDet = 1.0 / det;
+    Vec3 tvec = ray.Origin() - p0;
+
+    double u = dot(tvec, pvec) * invDet;
+    if (u < 0.0 || u > 1.0) return false;
+
+    Vec3 qvec = cross(tvec, e1);
+    double v = dot(ray.Direction(), qvec) * invDet;
+    if (v < 0.0 || u + v > 1.0) return false;
+
+    double t = dot(e2, qvec) * invDet;
+    if (!range.Surrounds(t)) return false;
+
+    record.t = t;
+    record.point = ray.At(t);
+    record.SetFaceNormal(ray, cross(e1, e2).normalize());
+    record.material = triangle.GetMaterial();
     return true;
 }

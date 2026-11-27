@@ -1,5 +1,6 @@
-static const uint PRIM_SPHERE = 0;
-static const uint PRIM_QUAD   = 1;
+static const uint PRIM_SPHERE   = 0;
+static const uint PRIM_QUAD     = 1;
+static const uint PRIM_TRIANGLE = 2;
 
 static const uint MAT_LAMBERTIAN = 0;
 static const uint MAT_METAL      = 1;

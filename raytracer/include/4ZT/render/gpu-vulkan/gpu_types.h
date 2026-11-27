@@ -3,8 +3,9 @@
 
 namespace FourZT {
 
-constexpr uint32_t kGpuPrimSphere = 0;
-constexpr uint32_t kGpuPrimQuad   = 1;
+constexpr uint32_t kGpuPrimSphere   = 0;
+constexpr uint32_t kGpuPrimQuad     = 1;
+constexpr uint32_t kGpuPrimTriangle = 2;
 
 constexpr uint32_t kGpuMatLambertian = 0;
 constexpr uint32_t kGpuMatMetal      = 1;
